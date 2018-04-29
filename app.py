@@ -26,7 +26,7 @@ LIMIT_FIDE = 32
 players = []
 confirmed = []
 
-if len(sys.argv) < 2:
+if len(sys.argv) < 3:
     print("Usage: app.py (csv file) (storage directory)")
     sys.exit()
 
@@ -118,17 +118,18 @@ for p in players:
                 blitz = int(f[blitz_i : blitz_j])
             # Choose ELO by precedence of blitz, rapid then std. If none, then set ELO to 1000
             if std > 0:
-                p[0] = std
+                p[ELO] = std
             if rapid > 0:
-                p[0] = rapid
+                p[ELO] = rapid
             if blitz > 0:
-                p[0] = blitz
-            p[0] = max(p[0], 1000)
+                p[ELO] = blitz
+            p[ELO] = max(p[ELO], 1000)
     if p[FIDE_ID] == '-':
         p[FIDE_ID] = ''
     player_sort.append(tuple(p))
 
-# Get first (LIMIT_FIDE) FIDE players
+# Get first (LIMIT_FIDE) FIDE players. If ELO points are same, earlier applications take precedence
+player_sort.sort(key=itemgetter(DATETIME))
 player_sort.sort(key=itemgetter(ELO), reverse=True)
 first_fide = list(filter(lambda p: p[FIDE_ID] != '', player_sort))
 first_fide = first_fide[:LIMIT_FIDE]
@@ -150,6 +151,13 @@ final = first_fide + rest
 with open(sys.argv[2] + '/results.txt', 'w') as f:
     for p in final:
         f.write("{:32s} ({}) {:^16} {}\n".format(p[NAME], p[ELO], "NTUA" if p[IS_NTUA] else "Not NTUA", p[DATETIME]))
+with open(sys.argv[2] + '/emails.txt', 'w') as f:
+    emails = [p[EMAIL] for p in final]
+    f.write(",".join(emails))
+with open(sys.argv[2] + '/final.csv', 'w') as f:
+    for p in final:
+        first, last = p[NAME].split()
+        f.write('{},{},{},{}\n'.format(first, last, p[FIDE_ID], p[ELO]))
 
 if len(sys.argv) > 2:
     with open(sys.argv[2] + '/confirmed.txt', 'w') as f:
