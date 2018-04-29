@@ -14,7 +14,9 @@ import sys, urllib, json
     The candidate players are firstly sorted by FIDE ELO and the first (LIMIT_FIDE) are chosen.
     The rest of the players are then sorted primarily by whether they are NTUA students and secondarily by their application datetime (earlier applications take precedence).
     In the second selection, the program chooses as many players from the rest as necessary to fill (LIMIT) positions in total.
-    The results are exported in (argv[2])/results.txt in table form.
+    The selected players are exported in (argv[2])/results.txt in table form.
+    Their emails are exported in (argv[2])/emails.txt separated by a comma for quick addition to e-mail recipients.
+    Finally, a CSV file suitable for insertion in the Blitz Arena platform is exported in (argv[2])/final.csv.
 """
 
 FIDE_URL = "http://ratings.fide.com/card.phtml?event="
